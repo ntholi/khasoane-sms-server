@@ -13,6 +13,8 @@ import javax.ws.rs.core.Response;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import com.github.kevinsawicki.http.HttpRequest;
+
 @Path("sms")
 public class Server {
 
@@ -23,24 +25,41 @@ public class Server {
 	@POST @Path("/send")
     @Consumes(MediaType.APPLICATION_JSON)
 	public Response send(Message msg){
-		String url = "http://smsplus1.routesms.com:8080"
+		String url = "http://api.rmlconnect.net"
 				+ "/bulksms/bulksms?username=m2camp"
 				+ "&password=njm9tgy7"
 				+ "&type=0&dlr=1"
 				+ "&source="+sender;
-		for(Recipient r: msg.getRecipients()){
+		for(Recipient re: msg.getRecipients()){
 			Map<String, String> data = new HashMap<String, String>();
-			if(r.getPhoneNumber() != null){
+			if(re.getPhoneNumber() != null){
 				String message = msg.getMessage();
-				message = message.replace("{firstName}", r.getFirstName());
-				message = message.replace("{lastName}", r.getLastName());
-				data.put("destination", r.getPhoneNumber());
+				message = addPlaceholders(re, message);
+				data.put("destination", re.getPhoneNumber());
 				data.put("message", message);
-//				int code = HttpRequest.post(url).form(data).code();
-//				System.out.println("Code: "+code);
-				System.out.println(r +"-> "+ message);
+				int code = HttpRequest.post(url).form(data).code();
+				System.out.println("Code: "+code);
+//				System.out.println(re +"-> "+ message);
 			}
 		}
 		return Response.ok().build();
+	}
+
+	private String addPlaceholders(Recipient re, String msg) {
+		String firstName = re.getFirstName();
+		String lastName = re.getLastName();
+		if(firstName != null && !firstName.trim().isEmpty()) {
+			msg = msg.replace("{firstName}", firstName);
+		}
+		else {
+			msg = msg.replace("{firstName}", "");
+		}
+		if(lastName != null && !lastName.trim().isEmpty()) {
+			msg = msg.replace("{lastName}", lastName);
+		}
+		else {
+			msg = msg.replace("{lastName}", "");
+		}
+		return msg;
 	}
 }
