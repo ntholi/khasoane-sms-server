@@ -15,6 +15,7 @@ import org.hibernate.cfg.Environment;
 
 import khasoane.Message;
 import khasoane.User;
+import khasoane.credits.Credits;
 
 public class HibernateHelper {
 
@@ -52,6 +53,7 @@ public class HibernateHelper {
         MetadataSources sources = new MetadataSources(registry);
         sources.addAnnotatedClass(Message.class);
         sources.addAnnotatedClass(User.class);
+        sources.addAnnotatedClass(Credits.class);
         
         return sources.getMetadataBuilder().build()
         		.getSessionFactoryBuilder().build();
