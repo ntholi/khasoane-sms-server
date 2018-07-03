@@ -1,6 +1,7 @@
 package khasoane;
 
 
+import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -27,15 +28,16 @@ public class Server {
 
 	protected final Logger logger = LogManager.getLogger(this.getClass());
 	private DAO<Credits> creditsDAO = new DAO<>(Credits.class);
-	String sender = "KhasoaneFX";
+	String sender = "KhasoaneFX".toUpperCase();
 	
 	@POST @Path("/send")
     @Consumes(MediaType.APPLICATION_JSON)
 	public Response send(Message msg){
 		int nCredits = getCredits();
 		if(nCredits < msg.getRecipients().size()) {
-			Response.status(401, "Insufficient credits, you want to send a message to "
-					+ msg.getRecipients().size() + " recipients, your balance is "+ nCredits);
+			return Response.status(401).entity("Insufficient credits, trying to send message to "
+					+ msg.getRecipients().size() + " recipient(s)\nBalance is "+ nCredits)
+					.build();
 		}
 		Response respose = null;
 		String url = "http://api.rmlconnect.net"
@@ -55,14 +57,22 @@ public class Server {
 					message = addPlaceholders(re, message);
 					params.put("destination", re.getPhoneNumber());
 					params.put("message", message);
-//					HttpRequest request = HttpRequest.post(url, params, true);
-//					request.code();
+					HttpRequest request = HttpRequest.post(url, params, true);
+					System.out.println(request.body());
 				}
 			}
 			respose = Response.ok().build();
-		} catch (Exception e) {
+		}
+		catch (HttpRequest.HttpRequestException e) {
+			respose = Response.status(500)
+					.entity("Unable to connect to external SMS server, "
+							+ "please check your Internet connection")
+					.build();
+		}
+		catch (Exception e) {
+			respose = Response.status(500).entity(e.getMessage())
+					.build();
 			e.printStackTrace();
-			respose = Response.status(500).entity(e.getMessage()).build();
 		}
 		finally {
 			msg.setRecipientCount(count);
