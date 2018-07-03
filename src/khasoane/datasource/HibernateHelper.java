@@ -69,4 +69,15 @@ public class HibernateHelper {
             }
         }
     }
+    
+    public static void destroy() {
+        if (sessionFactory != null) {
+            try {
+            	sessionFactory.close();
+            } catch (Exception e) {
+            	e.printStackTrace();
+            	logger.error("Couldn't close Session ", e);
+            }
+        }
+    }
 }
