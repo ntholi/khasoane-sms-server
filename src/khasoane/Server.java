@@ -112,7 +112,7 @@ public class Server {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.err.println(e);
 		}
 		
 		return credits.getCredits();
