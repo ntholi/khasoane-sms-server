@@ -1,7 +1,6 @@
 package khasoane;
 
 
-import java.net.UnknownHostException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -57,9 +56,8 @@ public class Server {
 					message = addPlaceholders(re, message);
 					params.put("destination", re.getPhoneNumber());
 					params.put("message", message);
-//					HttpRequest request = HttpRequest.post(url, params, true);
-//					System.out.println(request.body());
-					System.out.println("-> "+ message);
+					HttpRequest request = HttpRequest.post(url, params, true);
+					System.out.println(request.body());
 				}
 			}
 			respose = Response.ok().build();
@@ -127,29 +125,55 @@ public class Server {
 		String firstName = re.getFirstName();
 		String lastName = re.getLastName();
 		if(firstName != null && !firstName.trim().isEmpty()) {
-			msg = msg.replace("{firstName}", firstName);
-			msg = msg.replace("{firstname}", firstName);
+			msg = replace(msg, "{firstName}", firstName);
+			msg = replace(msg, "{firstname}", firstName);
 		}
 		else {
-			msg = msg.replace("{firstName}", "");
-			msg = msg.replace("{firstname}", "");
+			msg = replace(msg, "{firstName}", "");
+			msg = replace(msg, "{firstname}", "");
 		}
 		if(lastName != null && !lastName.trim().isEmpty()) {
-			msg = msg.replace("{lastName}", lastName);
-			msg = msg.replace("{lastname}", lastName);
-			msg = msg.replace("{surname}", lastName);
+			msg = replace(msg, "{lastName}", lastName);
+			msg = replace(msg, "{lastname}", lastName);
+			msg = replace(msg, "{surname}", lastName);
 		}
 		else {
-			msg = msg.replace("{lastName}", "");
-			msg = msg.replace("{lastname}", "");
-			msg = msg.replace("{surname}", "");
+			msg = replace(msg, "{lastName}", "");
+			msg = replace(msg, "{lastname}", "");
+			msg = replace(msg, "{surname}", "");
 		}
 		int i1 = msg.indexOf('{');
 		int i2 = msg.indexOf('}');
 		if(i1 != -1 && i2 != -1) {
 			String error = msg.substring(i1, i2+1);
-			msg = msg.replace(error, "");
+			msg = replace(msg, error, "");
 		}
-		return msg;
+		return replace(msg, "  ", " ");
 	}
+	
+    private String replace(final String text, String searchString, final String replacement) {
+        if (isEmpty(text) || isEmpty(searchString) || replacement == null) {
+            return text;
+        }
+        int start = 0;
+        int end = text.indexOf(searchString, start);
+        if (end == -1) {
+            return text;
+        }
+        final int replLength = searchString.length();
+        int increase = replacement.length() - replLength;
+        increase = increase < 0 ? 0 : increase;
+        final StringBuilder buf = new StringBuilder(text.length() + increase);
+        while (end != -1) {
+            buf.append(text.substring(start, end)).append(replacement);
+            start = end + replLength;
+            end = text.indexOf(searchString, start);
+        }
+        buf.append(text.substring(start));
+        return buf.toString();
+    }
+    
+    public static boolean isEmpty(final CharSequence cs) {
+        return cs == null || cs.length() == 0;
+    }
 }
