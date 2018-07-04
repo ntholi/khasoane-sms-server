@@ -57,8 +57,9 @@ public class Server {
 					message = addPlaceholders(re, message);
 					params.put("destination", re.getPhoneNumber());
 					params.put("message", message);
-					HttpRequest request = HttpRequest.post(url, params, true);
-					System.out.println(request.body());
+//					HttpRequest request = HttpRequest.post(url, params, true);
+//					System.out.println(request.body());
+					System.out.println("-> "+ message);
 				}
 			}
 			respose = Response.ok().build();
@@ -127,15 +128,27 @@ public class Server {
 		String lastName = re.getLastName();
 		if(firstName != null && !firstName.trim().isEmpty()) {
 			msg = msg.replace("{firstName}", firstName);
+			msg = msg.replace("{firstname}", firstName);
 		}
 		else {
 			msg = msg.replace("{firstName}", "");
+			msg = msg.replace("{firstname}", "");
 		}
 		if(lastName != null && !lastName.trim().isEmpty()) {
 			msg = msg.replace("{lastName}", lastName);
+			msg = msg.replace("{lastname}", lastName);
+			msg = msg.replace("{surname}", lastName);
 		}
 		else {
 			msg = msg.replace("{lastName}", "");
+			msg = msg.replace("{lastname}", "");
+			msg = msg.replace("{surname}", "");
+		}
+		int i1 = msg.indexOf('{');
+		int i2 = msg.indexOf('}');
+		if(i1 != -1 && i2 != -1) {
+			String error = msg.substring(i1, i2+1);
+			msg = msg.replace(error, "");
 		}
 		return msg;
 	}
