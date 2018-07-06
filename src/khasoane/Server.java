@@ -74,14 +74,16 @@ public class Server {
 			e.printStackTrace();
 		}
 		finally {
-			msg.setRecipientCount(count);
-			Credits credits = creditsDAO.get(clientId());
-			credits.deductCredits(count);
-			creditsDAO.save(credits);
-			try {
-				new DAO<>(Message.class).save(msg);
-			} catch (Exception e2) {
-				e2.printStackTrace();
+			if(count > 0) {
+				msg.setRecipientCount(count);
+				Credits credits = creditsDAO.get(clientId());
+				credits.deductCredits(count);
+				creditsDAO.save(credits);
+				try {
+					new DAO<>(Message.class).save(msg);
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				}
 			}
 		}
 		
@@ -114,7 +116,7 @@ public class Server {
 			System.err.println(e);
 		}
 		
-		return credits.getCredits();
+		return credits == null? 0: credits.getCredits();
 	}
 
 	private int clientId() {
